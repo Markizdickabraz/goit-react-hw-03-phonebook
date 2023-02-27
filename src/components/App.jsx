@@ -5,22 +5,40 @@ import ContactList from "./contactList/contactList";
 import Filter from "./filter/filter";
 import GlobalStyle from "./globalStyled";
 
+let filtredComponents = null;
+
 class App extends Component {
 
+  
   state = {
-   contacts: [],
+    contacts: [],
     filter: ''
   }
   
-deleteClick = (name) => {
-      this.setState(prevState => ({
+  deleteClick = (name) => {
+    this.setState(prevState => ({
       contacts: prevState.contacts.filter(contact => contact.name !== name),
     }
     ));
   }
 
+  componentDidMount() {
+    const localContacts = localStorage.getItem('contacts', this.state.contacts);
+    const contactsParse = JSON.parse(localContacts);
+    if (contactsParse) {
+      this.setState(
+       { contacts: contactsParse}
+      )
+    }
+  }
 
 
+  componentDidUpdate(prevProps, prevState) {
+    if (this.state.contacts !== prevState.contacts) {
+      localStorage.setItem('contacts' , JSON.stringify(this.state.contacts))
+    }
+  }
+  
   formSubmitHandler = (data) => {
     const filterdContacts = this.state.contacts.map(contact => contact.name);
     const someName = filterdContacts.some(name => name === data.name)
@@ -42,10 +60,12 @@ deleteClick = (name) => {
   }
   
   render() {
+   
+  
     const {filter } = this.state;
 
     const normalizedFilter = this.state.filter.toLowerCase();
-    const filtredComponents = this.state.contacts.filter(contact => contact.name.toLowerCase().includes(normalizedFilter))
+    filtredComponents = this.state.contacts.filter(contact => contact.name.toLowerCase().includes(normalizedFilter));
 
     return (
       <div>
